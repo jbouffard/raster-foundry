@@ -2,6 +2,7 @@ package com.azavea.rf.batch
 
 import java.io._
 import java.net._
+import java.nio.charset.Charset
 
 import cats.implicits._
 import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI, AmazonS3Client => AWSAmazonS3Client}
@@ -77,7 +78,7 @@ package object util {
   def readString(fileUri: URI): String = {
     val is = getStream(fileUri)
     try {
-      IOUtils.toString(is)
+      IOUtils.toString(is, Charset.defaultCharset())
     } finally {
       is.close()
     }
