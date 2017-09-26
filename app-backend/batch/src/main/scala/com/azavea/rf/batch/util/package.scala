@@ -1,20 +1,17 @@
 package com.azavea.rf.batch
 
-import io.circe.parser.parse
-import cats.implicits._
+import java.io._
+import java.net._
 
+import cats.implicits._
+import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI, AmazonS3Client => AWSAmazonS3Client}
 import geotrellis.raster.io.geotiff.reader.TiffTagsReader
 import geotrellis.raster.io.geotiff.tags.TiffTags
 import geotrellis.spark.io.s3.AmazonS3Client
 import geotrellis.spark.io.s3.util.S3RangeReader
-
-import com.amazonaws.auth._
-import com.amazonaws.services.s3.{AmazonS3URI, AmazonS3Client => AWSAmazonS3Client}
+import io.circe.parser.parse
 import org.apache.commons.io.IOUtils
 import org.apache.hadoop.conf.Configuration
-
-import java.io._
-import java.net._
 
 package object util {
   implicit class ConfigurationMethods(conf: Configuration) {
@@ -43,7 +40,7 @@ package object util {
       TiffTagsReader.read(uri.toString)
     case "s3" | "https" | "http" =>
       val s3Uri = new AmazonS3URI(uri)
-      val s3Client = new AmazonS3Client(new AWSAmazonS3Client(new DefaultAWSCredentialsProviderChain))
+      val s3Client = new AmazonS3Client(new AWSAmazonS3Client())
       val s3RangeReader = S3RangeReader(s3Uri.getBucket, s3Uri.getKey, s3Client)
       TiffTagsReader.read(s3RangeReader)
     case _ =>
@@ -59,7 +56,7 @@ package object util {
     case "https" =>
       uri.toURL.openStream
     case "s3" =>
-      val client = new AWSAmazonS3Client(new DefaultAWSCredentialsProviderChain)
+      val client = AmazonS3ClientBuilder.defaultClient()
       val s3uri = new AmazonS3URI(uri)
       client.getObject(s3uri.getBucket, s3uri.getKey).getObjectContent
     case _ =>

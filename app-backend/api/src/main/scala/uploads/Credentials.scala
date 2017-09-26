@@ -3,21 +3,21 @@ package com.azavea.rf.api.uploads
 import java.sql.Timestamp
 import java.util.{Date, UUID}
 
-import com.azavea.rf.api.utils.{Auth0Exception, Config}
-import com.azavea.rf.datamodel.User
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import com.amazonaws.auth.{AWSCredentials, AWSSessionCredentials, AWSStaticCredentialsProvider}
+import com.amazonaws.auth.{AWSCredentials, AWSSessionCredentials}
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.azavea.rf.api.utils.{Auth0Exception, Config}
+import com.azavea.rf.datamodel.User
 import com.typesafe.scalalogging.LazyLogging
+import de.heikoseeberger.akkahttpcirce.CirceSupport._
+import io.circe.Json
+import io.circe.generic.JsonCodec
+import io.circe.optics.JsonPath._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import io.circe.generic.JsonCodec
-import io.circe.optics.JsonPath._
-import io.circe.Json
-import de.heikoseeberger.akkahttpcirce.CirceSupport._
 
 
 @JsonCodec
@@ -68,10 +68,7 @@ object Auth0DelegationService extends Config with LazyLogging {
         case HttpResponse(StatusCodes.OK, _, entity, _) =>
           Unmarshal(entity).to[Json].map(credentialsPath.getOption).map {
             case Some(credentials) => {
-              val s3 = AmazonS3ClientBuilder.standard
-                         .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                         .withRegion(region)
-                         .build()
+              val s3 = AmazonS3ClientBuilder.defaultClient()
 
               // Add timestamp object to test credentials
               val now = new Timestamp(new Date().getTime)

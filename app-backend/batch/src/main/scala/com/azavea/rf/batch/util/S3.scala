@@ -1,33 +1,24 @@
 package com.azavea.rf.batch.util
 
-import geotrellis.spark.io.s3.S3InputFormat
-
-import com.amazonaws.auth.{AWSCredentialsProvider, DefaultAWSCredentialsProviderChain}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder, AmazonS3URI}
-import com.amazonaws.services.s3.model._
-import com.amazonaws.regions.Regions
-import org.apache.hadoop.conf.Configuration
-import org.apache.commons.io.IOUtils
-
 import java.net.URI
 
-import scala.collection.mutable
-import scala.collection.JavaConverters._
+import com.amazonaws.auth.{AWSCredentialsProvider, DefaultAWSCredentialsProviderChain}
+import com.amazonaws.services.s3.model._
+import com.amazonaws.services.s3.{AmazonS3ClientBuilder, AmazonS3URI}
+import geotrellis.spark.io.s3.S3InputFormat
+import org.apache.commons.io.IOUtils
+import org.apache.hadoop.conf.Configuration
+
 import scala.annotation.tailrec
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 case class S3(
   credentialsProviderChain: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain,
   region: Option[String] = None
 ) extends Serializable {
 
-  lazy val client: AmazonS3 = {
-    val builder =
-      AmazonS3ClientBuilder
-        .standard()
-        .withCredentials(credentialsProviderChain)
-
-    region.fold(builder)(builder.withRegion).build()
-  }
+  lazy val client = AmazonS3ClientBuilder.defaultClient()
 
   /** Copy buckets */
   @tailrec
