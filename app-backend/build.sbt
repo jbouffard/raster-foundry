@@ -150,7 +150,7 @@ lazy val root = Project("root", file("."))
   .settings(commonSettings:_*)
 
 lazy val api = Project("api", file("api"))
-  .dependsOn(db, datamodel, common % "test->test;compile->compile")
+  .dependsOn(db, database, datamodel, common % "test->test;compile->compile")
   .settings(apiSettings:_*)
   .settings(resolvers += Resolver.bintrayRepo("hseeberger", "maven"))
   .settings({
@@ -219,15 +219,15 @@ lazy val datamodel = Project("datamodel", file("datamodel"))
     )
   })
 
-/*lazy val database = Project("database", file("database"))*/
-/*  .dependsOn(datamodel)*/
-/*  .settings(commonSettings:_*)*/
-/*  .settings({*/
-/*     libraryDependencies ++= slickDependencies ++ dbDependencies ++ loggingDependencies ++ Seq(*/
-/*       Dependencies.akkaHttpExtensions,*/
-/*       Dependencies.slickPGCirce*/
-/*     )*/
-/*  })*/
+lazy val database = Project("database", file("database"))
+  .dependsOn(datamodel)
+  .settings(commonSettings:_*)
+  .settings({
+     libraryDependencies ++= slickDependencies ++ dbDependencies ++ loggingDependencies ++ Seq(
+       Dependencies.akkaHttpExtensions,
+       Dependencies.slickPGCirce
+     )
+  })
 
 lazy val batch = Project("batch", file("batch"))
   .dependsOn(common, datamodel, tool, bridge)
